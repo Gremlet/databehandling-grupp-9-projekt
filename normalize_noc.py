@@ -4,11 +4,8 @@ noc = pd.read_csv("./data/noc_regions.csv")
 
 FOLD_MAP = {
     # Germany family
-    "FRG": "GER",  # West Germany
-    "GDR": "GER",  # East Germany
     "EUA": "GER",  # United Team of Germany (1956/60/64)
     # Russia / USSR variants
-    "URS": "RUS",  # Soviet Union
     "EUN": "RUS",  # Unified Team (1992)
     "ROC": "RUS",  # Russian Olympic Committee (2020)
     "EUN": "RUS",
