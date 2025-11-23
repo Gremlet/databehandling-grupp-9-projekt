@@ -55,6 +55,24 @@ fig_age = px.histogram(
     title="Åldersfördelning i franska sporter"
 )
 
+# Vald Athetics, Swimming, Cycling att analysera
+selected_sports = ['Athletics', 'Swimming', 'Cycling']
+fr_sports = fr[fr["Sport"].isin(selected_sports)]
+medals = fr_sports[fr_sports["Medal"].notna()]
+
+medals_year = medals.groupby(
+    ['Year', 'Sport']).size().reset_index(name='Medals')
+
+fig_valda_sporter = px.line(
+    medals_year,
+    x='Year',
+    y='Medals',
+    color='Sport',
+    markers=True,
+    title='Antal medaljer per år (Athletics, Swimming, Cycling)'
+)
+
+
 # Skapa app
 app = Dash(__name__)
 
@@ -69,6 +87,9 @@ app.layout = html.Div([
 
     html.H2("Ålderfördelning i sporter"),
     dcc.Graph(figure=fig_age),
+
+    html.H2("Athletics, Swimming, Cycling"),
+    dcc.Graph(figure=fig_valda_sporter),
 ])
 
 # Starta server
