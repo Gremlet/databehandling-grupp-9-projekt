@@ -29,14 +29,18 @@ DATA_PATH = Path("athlete_events.csv")
 
 # Kolla om filen finns – annars ge ett tydligt felmeddelande
 if not DATA_PATH.exists():
-    raise FileNotFoundError("Hittar inte 'athlete_events.csv' i aktuell mapp. Lägg filen bredvid detta skript.")
+    raise FileNotFoundError(
+        "Hittar inte 'athlete_events.csv' i aktuell mapp. Lägg filen bredvid detta skript."
+    )
 
 # Läs in datan i en pandas-DataFrame
 raw = pd.read_csv(DATA_PATH)
 
 # Anonymisera namn enligt uppgiften (SHA-256)
 # Vi skapar en ny kolumn 'Name_hash' där vi ersätter namnet med en hash-sträng
-raw["Name_hash"] = raw["Name"].astype(str).apply(lambda x: hashlib.sha256(x.encode()).hexdigest())
+raw["Name_hash"] = (
+    raw["Name"].astype(str).apply(lambda x: hashlib.sha256(x.encode()).hexdigest())
+)
 
 # Ta bort originalkolumnen med riktiga namn för att anonymisera datan
 raw = raw.drop(columns=["Name"])
@@ -49,8 +53,11 @@ raw["Season"] = raw["Season"].astype("category")
 # Hjälplist för säsong – kan användas om man vill ha en viss ordning
 SEASON_ORDER = ["Summer", "Winter"]
 
+
 # Hjälpfunktion: filtrera på land och säsong
-def filter_country_season(df: pd.DataFrame, country: str, seasons: list[str]) -> pd.DataFrame:
+def filter_country_season(
+    df: pd.DataFrame, country: str, seasons: list[str]
+) -> pd.DataFrame:
     """
     Filtrerar datan till ett visst land och valda säsonger (Sommar/Vinter).
     """
@@ -63,9 +70,11 @@ def filter_country_season(df: pd.DataFrame, country: str, seasons: list[str]) ->
 
     return sub
 
+
 # Nyckelkolumner som definierar en unik medaljhändelse
 # används för att inte överräkna lagmedaljer
 MEDAL_KEYS = ["Year", "Season", "Team", "Event", "Medal"]
+
 
 def dedup_medals(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -79,13 +88,11 @@ def dedup_medals(df: pd.DataFrame) -> pd.DataFrame:
     m = m.drop_duplicates(MEDAL_KEYS)
     return m
 
+
 # Lista länder till dropdown:
 # Gruppar på 'Team', räknar unika ID (idrottare), sorterar, och tar ut index som lista
 countries = (
-    raw.groupby("Team")["ID"].nunique()
-    .sort_values(ascending=False)
-    .index
-    .tolist()
+    raw.groupby("Team")["ID"].nunique().sort_values(ascending=False).index.tolist()
 )
 
 # Standardland i dropdown: Frankrike om det finns, annars första landet i listan
@@ -95,6 +102,7 @@ DEFAULT_COUNTRY = "France" if "France" in countries else countries[0]
 
 # Skapa själva Dash-appen
 app = Dash(__name__)
+server = app.server
 app.title = "OS – Landstatistik"  # Sidtitel i webbläsaren
 
 # Kontrollpanel med dropdown, checkboxes och slider
@@ -106,12 +114,14 @@ controls = html.Div(
                 html.Label("Välj land"),
                 dcc.Dropdown(
                     id="country-dd",  # id används i callback
-                    options=[{"label": c, "value": c} for c in countries],  # alla länder
+                    options=[
+                        {"label": c, "value": c} for c in countries
+                    ],  # alla länder
                     value=DEFAULT_COUNTRY,  # förvalt land
                     clearable=False,  # kan inte rensa bort valet helt
                 ),
             ],
-            className="control"
+            className="control",
         ),
         # Välj säsong (Sommar/Vinter)
         html.Div(
@@ -127,7 +137,7 @@ controls = html.Div(
                     inline=True,  # visa valen på samma rad
                 ),
             ],
-            className="control"
+            className="control",
         ),
         # Välj topp N sporter
         html.Div(
@@ -139,10 +149,12 @@ controls = html.Div(
                     max=20,
                     step=1,
                     value=10,  # standard = topp 10
-                    marks={i: str(i) for i in range(5, 21, 5)},  # markeringar vid 5,10,15,20
+                    marks={
+                        i: str(i) for i in range(5, 21, 5)
+                    },  # markeringar vid 5,10,15,20
                 ),
             ],
-            className="control"
+            className="control",
         ),
     ],
     # Gör kontrollpanelen till en grid med tre kolumner (land, säsong, topp N)
@@ -194,6 +206,7 @@ app.layout = html.Div(
 
 # 3) Callbacks
 
+
 # Kopplar ihop inputs (dropdown, checklist, slider) med outputs (6 grafer)
 @app.callback(
     Output("fig-medals-year", "figure"),
@@ -202,8 +215,8 @@ app.layout = html.Div(
     Output("fig-medal-types", "figure"),
     Output("fig-efficiency", "figure"),
     Output("fig-gender-year", "figure"),
-    Input("country-dd", "value"),   # valt land
-    Input("season-cl", "value"),    # valda säsonger
+    Input("country-dd", "value"),  # valt land
+    Input("season-cl", "value"),  # valda säsonger
     Input("topn-slider", "value"),  # topp N sporter
 )
 def update_figs(country: str, seasons: list[str], topn: int):
@@ -226,7 +239,7 @@ def update_figs(country: str, seasons: list[str], topn: int):
             x="Year",
             y="Medals",
             markers=True,
-            title=f"Antal medaljer per OS – {country}"
+            title=f"Antal medaljer per OS – {country}",
         )
     else:
         # Om inga medaljer hittas – tom figur
@@ -234,12 +247,12 @@ def update_figs(country: str, seasons: list[str], topn: int):
 
     # 2) Medaljer per sport – topp N
     sport_counts = (
-        medals.groupby("Sport").size()
-        .sort_values(ascending=False)
-        .head(topn)
+        medals.groupby("Sport").size().sort_values(ascending=False).head(topn)
     )
     fig2 = px.bar(
-        sport_counts[::-1],  # vänd så att den populäraste sportens stapel hamnar längst upp
+        sport_counts[
+            ::-1
+        ],  # vänd så att den populäraste sportens stapel hamnar längst upp
         orientation="h",
         title=f"Topp {topn} sporter – medaljer för {country}",
         labels={"value": "Medaljer", "index": "Sport"},
