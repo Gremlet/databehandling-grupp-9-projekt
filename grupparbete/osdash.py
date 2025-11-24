@@ -51,7 +51,8 @@ DEFAULT_COUNTRY = "France" if "France" in countries else countries[0]
 #byggandet av dash-appen, fortsättning följer.....
 app = dash.Dash(__name__)
 
-app.layout = html.Div([
+
+controls = html.Div([
 html.Label("Välj land"),
 dcc.Dropdown(
     id="country-dropdown",
@@ -59,8 +60,19 @@ dcc.Dropdown(
     value=DEFAULT_COUNTRY,
     clearable=False,
     className = "control"
-)
+)])
+
+html.Div(
+            [
+html.Label("Säsong"),
+dcc.Checklist(
+    id="season-cl",
+    options=[{"label": "Sommar", "value": "Summer"}, {"label": "Vinter", "value": "Winter"}],
+    value=["Summer", "Winter"],
+    inline=True,
+    className="control"
+)]),
 
 
-
-
+if __name__ == "__main__":
+    app.run(debug=True)
