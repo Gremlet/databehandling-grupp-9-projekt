@@ -311,8 +311,10 @@ def update_figs(country: str, seasons: list[str], topn: int):
         x="Year",
         y="Medals_per_100",
         markers=True,
-        title=f"Medaljeffektivitet (medaljer per 100 deltagare) – {country}",
+        title=f"Medaljeffektivitet (% medaljer per deltagare) – {country}",
     )
+
+    fig5.update_layout(yaxis_title="Medals per participant (%)")
 
     # 6) Könsfördelning bland medaljörer per år – staplat
     gender_year = medals.groupby(["Year", "Sex"]).size().reset_index(name="Count")
