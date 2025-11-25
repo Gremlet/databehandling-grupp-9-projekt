@@ -279,6 +279,12 @@ def update_figs(country: str, seasons: list[str], topn: int):
         )
         medal_types = medal_types.sort_values(["Year", "Medal"])
 
+    medal_colors = {
+        "Gold": "#FFD700",
+        "Silver": "#8F9AA1",
+        "Bronze": "#CD7F32",
+    }
+
     fig4 = px.bar(
         medal_types,
         x="Year",
@@ -286,6 +292,7 @@ def update_figs(country: str, seasons: list[str], topn: int):
         color="Medal",
         title=f"Medaljtyper per OS – {country}",
         barmode="stack",  # stackade staplar = totalen + fördelning
+        color_discrete_map=medal_colors,
     )
 
     # 5) Medaljeffektivitet: medaljer / 100 deltagare
