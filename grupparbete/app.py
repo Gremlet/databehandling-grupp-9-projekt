@@ -305,7 +305,7 @@ def update_figs(country: str, seasons: list[str], topn: int):
     eff = pd.concat([participants, medals_year], axis=1).fillna(0)
 
     # Beräkna medaljer per 100 deltagare, undvik division med 0
-    eff["Medals_per_100"] = np.where(
+    eff["percent"] = np.where(
         eff["Participants"] > 0,
         eff["Medals"] / eff["Participants"] * 100,
         0,
@@ -316,9 +316,9 @@ def update_figs(country: str, seasons: list[str], topn: int):
     fig5 = px.line(
         eff,
         x="Year",
-        y="Medals_per_100",
+        y="percent",
         markers=True,
-        title=f"Medaljeffektivitet (% medaljer per deltagare) – {country}",
+        title=f"Medaljeffektivitet – {country}",
     )
 
     fig5.update_layout(yaxis_title="Medals per participant (%)")
